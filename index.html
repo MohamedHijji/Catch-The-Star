@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Catch the Star with Timer</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: linear-gradient(to bottom, #2e3d55, #121c2b);
+      overflow: hidden;
+      color: white;
+      text-align: center;
+    }
+    #scoreboard {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 20px;
+    }
+    #timer {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 20px;
+    }
+    #game {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .star {
+      width: 40px;
+      height: 40px;
+      background: yellow;
+      border-radius: 50%;
+      position: absolute;
+      cursor: pointer;
+      box-shadow: 0 0 15px white;
+    }
+    #gameOver {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      display: none;
+    }
+    #restart {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #f9c74f;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="scoreboard">Score: 0 | Missed: 0</div>
+  <div id="timer">Time: 0s</div>
+  <div id="game">
+    <div id="gameOver">
+      Game Over<br />
+      <button id="restart">Restart</button>
+    </div>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+    const scoreboard = document.getElementById("scoreboard");
+    const timerDisplay = document.getElementById("timer");
+    const gameOverScreen = document.getElementById("gameOver");
+    const restartBtn = document.getElementById("restart");
+
+    let score = 0;
+    let missed = 0;
+    const maxMisses = 5;
+    let seconds = 0;
+    let gameLoop, timerLoop;
+    let timerRunning = false;
+
+    function spawnStar() {
+      const star = document.createElement("div");
+      star.classList.add("star");
+      const x = Math.random() * (window.innerWidth - 40);
+      const y = Math.random() * (window.innerHeight - 40);
+      star.style.left = x + "px";
+      star.style.top = y + "px";
+
+      let clicked = false;
+
+      star.onclick = () => {
+        score++;
+        clicked = true;
+        game.removeChild(star);
+        updateScore();
+      };
+
+      game.appendChild(star);
+
+      setTimeout(() => {
+        if (!clicked) {
+          missed++;
+          updateScore();
+          game.removeChild(star);
+          if (timerRunning) {
+            clearInterval(timerLoop);
+            timerRunning = false;
+          }
+          if (missed >= maxMisses) endGame();
+        }
+      }, 1000);
+    }
+
+    function updateScore() {
+      scoreboard.textContent = `Score: ${score} | Missed: ${missed}`;
+    }
+
+    function updateTimer() {
+      seconds++;
+      timerDisplay.textContent = `Time: ${seconds}s`;
+    }
+
+    function endGame() {
+      clearInterval(gameLoop);
+      clearInterval(timerLoop);
+      gameOverScreen.style.display = "block";
+    }
+
+    function restartGame() {
+      score = 0;
+      missed = 0;
+      seconds = 0;
+      updateScore();
+      timerDisplay.textContent = "Time: 0s";
+      gameOverScreen.style.display = "none";
+      startGame();
+    }
+
+    restartBtn.onclick = restartGame;
+
+    function startGame() {
+      timerRunning = true;
+      gameLoop = setInterval(spawnStar, 1200);
+      timerLoop = setInterval(updateTimer, 1000);
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
